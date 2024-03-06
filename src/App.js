@@ -32,37 +32,50 @@ function App() {
 
 export default App;
 
+// -----------------------------------FriendList-----------------------------------------------
+
 function FriendList({list}){
 
-  const [addfriend,setAddFriend] = useState(false);
+  const [friends, setFriends ] = useState(list);
+
+  console.log(friends);
+
+  const [openFriend,setOpenFriend] = useState(false);
   const [openBill,SetOpenBill] = useState(true);
 
-  function addNewFriend(){
-    addfriend ? setAddFriend(false) : setAddFriend(true);
+  function openNewFriend(){
+    openFriend ? setOpenFriend(false) : setOpenFriend(true);
   }
 
   function openSplitBill(){
     openBill ? SetOpenBill(false) : SetOpenBill(true);
   }
 
+  function addNewFriend(friend){
+    setFriends((friends)=> [...friends, friend]);
+    setOpenFriend(false);
+  }
+
   return(
     <div className="app">
       <ul className="sidebar">
-        {list.map((friends)=> <Friend friend = {friends} key={friends.id} openBill={openSplitBill} />)}
-        {!addfriend && (
+        {friends.map((friends)=> <Friend friend = {friends} key={friends.id} openBill={openSplitBill} />)}
+        {!openFriend && (
         <li>
-          <Button onclick={addNewFriend} >Add friend</Button>
+          <Button onclick={openNewFriend} >Add friend</Button>
         </li>
         )}
         <>
-        <AddFriend addfriend={addfriend} />
-        {addfriend && (<li><Button onclick={addNewFriend} >Close</Button></li>)}
+        <AddFriend openFriend={openFriend} addNewFriend={addNewFriend}/>
+        {openFriend && (<li><Button onclick={openNewFriend} >Close</Button></li>)}
         </>
       </ul>
       {openBill && <FormSplitBill />}
     </div>
   );
 }
+
+// ---------------------------------------Friend-------------------------------------------
 
 function Friend({friend,openBill}){
   return(
@@ -85,19 +98,25 @@ function Friend({friend,openBill}){
   )
 }
 
+// -------------------------------------Button---------------------------------------------
+
 function Button({onclick, children}){
   return (
     <button className="button" onClick={onclick} >{children}</button>
   )
 }
 
-function AddFriend({addfriend}){
+// --------------------------------------AddFriend--------------------------------------------
+
+function AddFriend({openFriend, addNewFriend}){
   const [name, setName] = useState('');
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState("https://i.pravatar.cc/48");
   
 
   function handleSubmit(e){
     e.preventDefault();
+
+    if(!name || !image) return;
 
     const id = crypto.randomUUID();
     const newFriend = {
@@ -106,12 +125,14 @@ function AddFriend({addfriend}){
       image: `${image}?=${id}`,
       balance: 0,
     }
-    console.log(newFriend);
+    addNewFriend(newFriend);
+    setName('');
+    setImage("https://i.pravatar.cc/48");
   }
 
   return(
     <div>
-    {addfriend && (
+    {openFriend && (
       <form className="form-add-friend" onSubmit={handleSubmit}>
         <label>👩🏻‍🤝‍👩🏻Friend Name</label>
         <input type="text" value={name} onChange={e=>setName(e.target.value)} ></input>
@@ -122,6 +143,8 @@ function AddFriend({addfriend}){
     </div>
   )
 }
+
+// --------------------------------------FormSplitBill--------------------------------------------
 
 function FormSplitBill(){
   return(
